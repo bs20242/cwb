@@ -22,5 +22,4 @@ Como funciona
 2. Instale todas as dependências necessárias:
    pip install -r requirements.txt
 
-3. Instale os hooks do Git para este repositório:
-   pre-commit install
+para executar: py/phyton main.py --repo "local do repositório" --branch "nome da branch" 
