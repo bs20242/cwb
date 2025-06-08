@@ -1,0 +1,6 @@
+GitPython
+crewai
+python-dotenv
+PyYAML
+
+pre-commit

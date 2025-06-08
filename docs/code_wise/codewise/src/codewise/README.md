@@ -13,3 +13,14 @@ Como funciona
 
 1. O programa no momento recebe uma entrada.txt que pretende ser gerada com base no ultimo commit dado no repositório, com os dados a serem analisados, e então cada agente gera um arquivo markdown de sua análise, no final gerando uma resposta.txt com a unificação de todas as respostas dos agentes.
 
+# Setup do Projeto
+
+1. Clone o repositório:
+   git clone <url-do-seu-projeto>
+   cd <nome-do-projeto>
+
+2. Instale todas as dependências necessárias:
+   pip install -r requirements.txt
+
+3. Instale os hooks do Git para este repositório:
+   pre-commit install

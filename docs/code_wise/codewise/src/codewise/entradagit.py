@@ -51,3 +51,4 @@ def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quan
         arquivo_saida.write("\n".join(entrada))
 
     print(f"{caminho_saida} gerado com os {len(commits_selecionados)} commits pendentes de push.") 
+    return True
