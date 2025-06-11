@@ -1,7 +1,10 @@
 from git import Repo
+import os
 
 def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quantidade=2, nome_branch="cwb"):
-    repo = Repo(caminho_repo, search_parent_directories=True)    
+    caminho_saida = os.path.abspath(caminho_saida)  # ✅ Caminho absoluto
+
+    repo = Repo(caminho_repo, search_parent_directories=True)
     branch_local = repo.heads[nome_branch]
     branch_remota = repo.remotes.origin.refs[nome_branch]
 
@@ -12,12 +15,10 @@ def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quan
         return
 
     commits_selecionados = list(reversed(commits_pendentes[:quantidade]))
-
     entrada = []
 
     for commit_atual in commits_selecionados:
         commit_anterior = commit_atual.parents[0] if commit_atual.parents else None
-
         entrada.append("Mensagem do commit:")
         entrada.append(f"\"{commit_atual.message.strip()}\"\n")
 
@@ -50,5 +51,5 @@ def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quan
     with open(caminho_saida, "w", encoding="utf-8") as arquivo_saida:
         arquivo_saida.write("\n".join(entrada))
 
-    print(f"{caminho_saida} gerado com os {len(commits_selecionados)} commits pendentes de push.") 
+    print(f"{caminho_saida} gerado com os {len(commits_selecionados)} commits pendentes de push.")
     return True

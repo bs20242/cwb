@@ -18,22 +18,31 @@ class Codewise:
         if not os.getenv("GEMINI_API_KEY"):
             print("Erro: A variável de ambiente GEMINI_API_KEY não foi definida.")
             sys.exit(1)
-            
+
         try:
-             self.llm = LLM(
-                model="gemini/gemini-1.5-flash",
+            self.llm = LLM(
+                model="gemini/gemini-2.0-flash",
                 temperature=0.7
             )
         except Exception as e:
             print(f"Erro ao inicializar o LLM. Verifique sua chave de API e dependências. Erro: {e}")
             sys.exit(1)
 
+        # Corrigir caminhos com base no diretório onde o script está
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(base_dir, "config")
 
-        with open('config/agents.yaml', 'r', encoding='utf-8') as f:
-            self.agents_config = yaml.safe_load(f)
+        agents_path = os.path.join(config_path, "agents.yaml")
+        tasks_path = os.path.join(config_path, "tasks.yaml")
 
-        with open('config/tasks.yaml', 'r', encoding='utf-8') as f:
-            self.tasks_config = yaml.safe_load(f)
+        try:
+            with open(agents_path, "r", encoding="utf-8") as f:
+                self.agents_config = yaml.safe_load(f)
+            with open(tasks_path, "r", encoding="utf-8") as f:
+                self.tasks_config = yaml.safe_load(f)
+        except FileNotFoundError as e:
+            print(f"Erro: Arquivo de configuração não encontrado: {e}")
+            sys.exit(1)
 
     @agent
     def senior_architect(self) -> Agent:
@@ -59,25 +68,25 @@ class Codewise:
     def task_estrutura(self) -> Task:
         cfg = self.tasks_config['analise_estrutura']
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.senior_architect(), output_file='arquitetura_atual.md')
+                    agent=self.senior_architect(), output_file=os.path.join(os.path.dirname(__file__),'arquitetura_atual.md'))
 
     @task
     def task_heuristicas(self) -> Task:
         cfg = self.tasks_config['analise_heuristicas']
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.senior_analytics(), output_file='analise_heuristicas_integracoes.md')
+                    agent=self.senior_analytics(), output_file=os.path.join(os.path.dirname(__file__),'analise_heuristicas_integracoes.md'))
 
     @task
     def task_solid(self) -> Task:
         cfg = self.tasks_config['analise_solid']
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.quality_consultant(), output_file='analise_solid.md')
+                    agent=self.quality_consultant(), output_file=os.path.join(os.path.dirname(__file__),'analise_solid.md'))
 
     @task
     def task_padroes(self) -> Task:
         cfg = self.tasks_config['padroes_projeto']
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.quality_control_manager(), output_file='padroes_de_projeto.md')
+                    agent=self.quality_control_manager(), output_file=os.path.join(os.path.dirname(__file__),'padroes_de_projeto.md'))
 
     @task
     def task_summarize(self) -> Task:
@@ -85,7 +94,6 @@ class Codewise:
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
                     agent=self.summary_specialist())
 
-    # --- CORREÇÃO: Decorador @crew removido ---
     def crew(self) -> Crew:
         """Monta a equipe principal de análise de código."""
         return Crew(
@@ -104,7 +112,6 @@ class Codewise:
             process=Process.sequential
         )
 
-    # --- CORREÇÃO: Decorador @crew removido ---
     def summary_crew(self) -> Crew:
         """Monta a equipe dedicada a criar o resumo da análise."""
         return Crew(
