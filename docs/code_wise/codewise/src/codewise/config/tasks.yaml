@@ -31,3 +31,17 @@ padroes_projeto:
     Documento padroes_de_projeto.md com sugestões aplicadas ao cenário descrito no commit.
   agent: quality_control_manager
 
+summarize_analysis:
+  description: >
+    Leia a análise de código completa fornecida abaixo e crie um resumo executivo em português.
+    O resumo deve destacar os pontos mais críticos, sugestões de melhoria e pontos positivos.
+    Deve ser conciso (máximo 3 parágrafos) e formatado para fácil leitura no terminal.
+    O resultado NÃO deve ser um arquivo, mas sim o texto do resumo.
+    
+    ANÁLISE COMPLETA:
+    ---
+    {analysis_result}
+    ---
+  expected_output: >
+    Um resumo conciso e bem estruturado da análise de código, pronto para ser impresso no console.
+  agent: summary_specialist

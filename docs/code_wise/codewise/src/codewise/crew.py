@@ -10,23 +10,30 @@ from crewai.project import CrewBase, agent, crew, task
 class Codewise:
     """Classe principal da crew Codewise"""
 
-    def __init__(self, commit_message: str):
+    def __init__(self, commit_message: str = ""):
         load_dotenv()
-
-        print(f"DEBUG: commit_message recebido -> {repr(commit_message)}") 
         self.commit_message = commit_message
 
-        self.llm = LLM(
-            model="gemini/gemini-2.0-flash",
-            temperature=0.7
-        )
+        # Verifique se a chave da API está no ambiente
+        if not os.getenv("GEMINI_API_KEY"):
+            print("Erro: A variável de ambiente GEMINI_API_KEY não foi definida.")
+            sys.exit(1)
+            
+        try:
+             self.llm = LLM(
+                model="gemini/gemini-1.5-flash",
+                temperature=0.7
+            )
+        except Exception as e:
+            print(f"Erro ao inicializar o LLM. Verifique sua chave de API e dependências. Erro: {e}")
+            sys.exit(1)
+
 
         with open('config/agents.yaml', 'r', encoding='utf-8') as f:
             self.agents_config = yaml.safe_load(f)
 
         with open('config/tasks.yaml', 'r', encoding='utf-8') as f:
             self.tasks_config = yaml.safe_load(f)
-
 
     @agent
     def senior_architect(self) -> Agent:
@@ -43,6 +50,10 @@ class Codewise:
     @agent
     def quality_control_manager(self) -> Agent:
         return Agent(config=self.agents_config['quality_control_manager'], llm=self.llm, verbose=True)
+
+    @agent
+    def summary_specialist(self) -> Agent:
+        return Agent(config=self.agents_config['summary_specialist'], llm=self.llm, verbose=False)
 
     @task
     def task_estrutura(self) -> Task:
@@ -68,8 +79,15 @@ class Codewise:
         return Task(description=cfg['description'], expected_output=cfg['expected_output'],
                     agent=self.quality_control_manager(), output_file='padroes_de_projeto.md')
 
-    @crew
+    @task
+    def task_summarize(self) -> Task:
+        cfg = self.tasks_config['summarize_analysis']
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
+                    agent=self.summary_specialist())
+
+    # --- CORREÇÃO: Decorador @crew removido ---
     def crew(self) -> Crew:
+        """Monta a equipe principal de análise de código."""
         return Crew(
             agents=[
                 self.senior_architect(),
@@ -83,5 +101,14 @@ class Codewise:
                 self.task_solid(),
                 self.task_padroes()
             ],
+            process=Process.sequential
+        )
+
+    # --- CORREÇÃO: Decorador @crew removido ---
+    def summary_crew(self) -> Crew:
+        """Monta a equipe dedicada a criar o resumo da análise."""
+        return Crew(
+            agents=[self.summary_specialist()],
+            tasks=[self.task_summarize()],
             process=Process.sequential
         )
