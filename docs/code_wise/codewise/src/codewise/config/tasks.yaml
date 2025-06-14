@@ -33,15 +33,8 @@ padroes_projeto:
 
 summarize_analysis:
   description: >
-    Leia a análise de código completa fornecida abaixo e crie um resumo executivo em português.
-    O resumo deve destacar os pontos mais críticos, sugestões de melhoria e pontos positivos.
-    Deve ser conciso (máximo 3 parágrafos) e formatado para fácil leitura no terminal.
-    O resultado NÃO deve ser um arquivo, mas sim o texto do resumo.
-    
-    ANÁLISE COMPLETA:
-    ---
-    {analysis_result}
-    ---
+    Com base na análise técnica a seguir: "{analysis_result}",
+    escreva um resumo objetivo e claro descrevendo o que foi implementado no código analisado com base nas boas práticas de Pull Request.
   expected_output: >
-    Um resumo conciso e bem estruturado da análise de código, pronto para ser impresso no console.
-  agent: summary_specialist
+    Um parágrafo bem estruturado com as alterações realizadas, pronto para ser usado como descrição de um Pull Request em (pt-br).
+
