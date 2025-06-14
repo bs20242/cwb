@@ -2,8 +2,7 @@ from git import Repo
 import os
 
 def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quantidade=2, nome_branch="cwb"):
-    caminho_saida = os.path.abspath(caminho_saida)  # ✅ Caminho absoluto
-
+    caminho_saida = os.path.abspath(caminho_saida) 
     repo = Repo(caminho_repo, search_parent_directories=True)
     branch_local = repo.heads[nome_branch]
     branch_remota = repo.remotes.origin.refs[nome_branch]
