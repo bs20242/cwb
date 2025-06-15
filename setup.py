@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 try:
-    with open('requirements.txt') as f:
+    with open('requirements.txt', encoding='utf-8') as f:
         required = f.read().splitlines()
 except FileNotFoundError:
     required = []
 
 setup(
     name="codewise_lib",
-    version="0.2.0", # Aumentamos a versão para refletir as novas funcionalidades
+    version="2.0.0", # Versão final e estável
     author="BPC",
     description="Uma ferramenta para análise de código e automação de PRs com CrewAI.",
     package_dir={
@@ -16,14 +16,16 @@ setup(
         'scripts': 'scripts'
     },
     packages=['codewise_lib', 'scripts'],
+    package_data={
+        'codewise_lib': ['config/*.yaml'],
+    },
     include_package_data=True,
     install_requires=required,
     python_requires='>=3.11',
-
-    # Adicionamos o novo comando 'codewise-init'
     entry_points={
         'console_scripts': [
-            'codewise-pr=scripts.codewise_review_win:main',
+            'codewise-pr=scripts.codewise_review_win:main_pr',
+            'codewise-lint=scripts.codewise_review_win:main_lint',
             'codewise-init=scripts.install_hook:main',
         ],
     },

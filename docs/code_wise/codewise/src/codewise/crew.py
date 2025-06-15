@@ -1,3 +1,5 @@
+# C:\Users\BPC\CodeWise\docs\code_wise\codewise\src\codewise\crew.py
+# (Seu código, que será mantido)
 import sys
 import os
 import re
@@ -9,16 +11,12 @@ from crewai.project import CrewBase, agent, crew, task
 @CrewBase
 class Codewise:
     """Classe principal da crew Codewise"""
-
     def __init__(self, commit_message: str = ""):
         load_dotenv()
         self.commit_message = commit_message
-
-        # Verifique se a chave da API está no ambiente
         if not os.getenv("GEMINI_API_KEY"):
             print("Erro: A variável de ambiente GEMINI_API_KEY não foi definida.")
             sys.exit(1)
-
         try:
             self.llm = LLM(
                 model="gemini/gemini-2.0-flash",
@@ -27,11 +25,9 @@ class Codewise:
         except Exception as e:
             print(f"Erro ao inicializar o LLM. Verifique sua chave de API e dependências. Erro: {e}")
             sys.exit(1)
-
-        # Corrigir caminhos com base no diretório onde o script está
+        
         base_dir = os.path.dirname(os.path.abspath(__file__))
         config_path = os.path.join(base_dir, "config")
-
         agents_path = os.path.join(config_path, "agents.yaml")
         tasks_path = os.path.join(config_path, "tasks.yaml")
 
@@ -45,75 +41,46 @@ class Codewise:
             sys.exit(1)
 
     @agent
-    def senior_architect(self) -> Agent:
-        return Agent(config=self.agents_config['senior_architect'], llm=self.llm, verbose=True)
-
+    def senior_architect(self) -> Agent: return Agent(config=self.agents_config['senior_architect'], llm=self.llm, verbose=False)
     @agent
-    def senior_analytics(self) -> Agent:
-        return Agent(config=self.agents_config['senior_analytics'], llm=self.llm, verbose=True)
-
+    def senior_analytics(self) -> Agent: return Agent(config=self.agents_config['senior_analytics'], llm=self.llm, verbose=False)
     @agent
-    def quality_consultant(self) -> Agent:
-        return Agent(config=self.agents_config['quality_consultant'], llm=self.llm, verbose=True)
-
+    def quality_consultant(self) -> Agent: return Agent(config=self.agents_config['quality_consultant'], llm=self.llm, verbose=False)
     @agent
-    def quality_control_manager(self) -> Agent:
-        return Agent(config=self.agents_config['quality_control_manager'], llm=self.llm, verbose=True)
-
+    def quality_control_manager(self) -> Agent: return Agent(config=self.agents_config['quality_control_manager'], llm=self.llm, verbose=False)
     @agent
-    def summary_specialist(self) -> Agent:
-        return Agent(config=self.agents_config['summary_specialist'], llm=self.llm, verbose=False)
-
+    def summary_specialist(self) -> Agent: return Agent(config=self.agents_config['summary_specialist'], llm=self.llm, verbose=False)
+    
     @task
     def task_estrutura(self) -> Task:
         cfg = self.tasks_config['analise_estrutura']
-        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.senior_architect(), output_file=os.path.join(os.path.dirname(__file__),'arquitetura_atual.md'))
-
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'], agent=self.senior_architect(), output_file=os.path.join(os.path.dirname(__file__),'arquitetura_atual.md'))
     @task
     def task_heuristicas(self) -> Task:
         cfg = self.tasks_config['analise_heuristicas']
-        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.senior_analytics(), output_file=os.path.join(os.path.dirname(__file__),'analise_heuristicas_integracoes.md'))
-
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'], agent=self.senior_analytics(), output_file=os.path.join(os.path.dirname(__file__),'analise_heuristicas_integracoes.md'))
     @task
     def task_solid(self) -> Task:
         cfg = self.tasks_config['analise_solid']
-        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.quality_consultant(), output_file=os.path.join(os.path.dirname(__file__),'analise_solid.md'))
-
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'], agent=self.quality_consultant(), output_file=os.path.join(os.path.dirname(__file__),'analise_solid.md'))
     @task
     def task_padroes(self) -> Task:
         cfg = self.tasks_config['padroes_projeto']
-        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.quality_control_manager(), output_file=os.path.join(os.path.dirname(__file__),'padroes_de_projeto.md'))
-
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'], agent=self.quality_control_manager(), output_file=os.path.join(os.path.dirname(__file__),'padroes_de_projeto.md'))
     @task
     def task_summarize(self) -> Task:
         cfg = self.tasks_config['summarize_analysis']
-        return Task(description=cfg['description'], expected_output=cfg['expected_output'],
-                    agent=self.summary_specialist())
+        return Task(description=cfg['description'], expected_output=cfg['expected_output'], agent=self.summary_specialist())
 
+    @crew
     def crew(self) -> Crew:
-        """Monta a equipe principal de análise de código."""
         return Crew(
-            agents=[
-                self.senior_architect(),
-                self.senior_analytics(),
-                self.quality_consultant(),
-                self.quality_control_manager()
-            ],
-            tasks=[
-                self.task_estrutura(),
-                self.task_heuristicas(),
-                self.task_solid(),
-                self.task_padroes()
-            ],
+            agents=[self.senior_architect(), self.senior_analytics(), self.quality_consultant(), self.quality_control_manager()],
+            tasks=[self.task_estrutura(), self.task_heuristicas(), self.task_solid(), self.task_padroes()],
             process=Process.sequential
         )
 
     def summary_crew(self) -> Crew:
-        """Monta a equipe dedicada a criar o resumo da análise."""
         return Crew(
             agents=[self.summary_specialist()],
             tasks=[self.task_summarize()],

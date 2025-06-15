@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: codewise_lib
+Version: 0.1.0
+Summary: Uma biblioteca para análise de código e automação de PRs com CrewAI.
+Author: BPC
+Requires-Python: >=3.11
+Requires-Dist: crewai
+Requires-Dist: python-dotenv
+Requires-Dist: gitpython
+Requires-Dist: pyyaml
+Requires-Dist: google-generativeai
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

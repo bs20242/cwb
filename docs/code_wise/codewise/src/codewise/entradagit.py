@@ -1,54 +1,57 @@
-from git import Repo
+from git import Repo, GitCommandError
 import os
+import sys
 
-def gerar_entrada_automatica(caminho_repo=".", caminho_saida="entrada.txt", quantidade=2, nome_branch="cwb"):
-    caminho_saida = os.path.abspath(caminho_saida) 
-    repo = Repo(caminho_repo, search_parent_directories=True)
-    branch_local = repo.heads[nome_branch]
-    branch_remota = repo.remotes.origin.refs[nome_branch]
+def gerar_entrada_automatica(caminho_repo, caminho_saida, nome_branch):
+    try:
+        repo = Repo(caminho_repo, search_parent_directories=True)
+        if nome_branch not in repo.heads:
+            print(f"Branch local '{nome_branch}' não encontrada.", file=sys.stderr)
+            return False
+        branch_local = repo.heads[nome_branch]
+        commits_pendentes = []
 
-    commits_pendentes = list(repo.iter_commits(f"{branch_remota}..{branch_local}"))
-
-    if not commits_pendentes:
-        print("Nenhum commit pendente de push encontrado.")
-        return
-
-    commits_selecionados = list(reversed(commits_pendentes[:quantidade]))
-    entrada = []
-
-    for commit_atual in commits_selecionados:
-        commit_anterior = commit_atual.parents[0] if commit_atual.parents else None
-        entrada.append("Mensagem do commit:")
-        entrada.append(f"\"{commit_atual.message.strip()}\"\n")
-
-        if commit_anterior:
-            diffs = commit_anterior.diff(commit_atual, create_patch=True)
-            for diff in diffs:
-                if diff.change_type == "D":
-                    continue
-                arquivo = diff.b_path or diff.a_path
-
-                entrada.append(f"Código atual:\n# Arquivo: {arquivo}")
-                try:
-                    blob_antigo = commit_anterior.tree / arquivo
-                    entrada.append(blob_antigo.data_stream.read().decode("utf-8"))
-                except Exception:
-                    entrada.append("# Arquivo novo")
-
-                entrada.append(f"\nCódigo alterado:\n# Arquivo: {arquivo}")
-                try:
-                    blob_novo = commit_atual.tree / arquivo
-                    entrada.append(blob_novo.data_stream.read().decode("utf-8"))
-                except Exception:
-                    entrada.append("# Arquivo deletado")
-
-                entrada.append("\n" + "=" * 80 + "\n")
+        if 'origin' in repo.remotes:
+            try:
+                repo.remotes.origin.fetch(prune=True)
+                branch_remota_ref = f'origin/{branch_local.name}'
+                commits_pendentes = list(repo.iter_commits(f"{branch_remota_ref}..{branch_local.name}"))
+            except GitCommandError:
+                default_branch_name = "main" if 'main' in repo.heads else 'master'
+                print(f"AVISO: Branch '{branch_local.name}' não encontrada no remote. Comparando com a branch '{default_branch_name}'.", file=sys.stderr)
+                commits_pendentes = list(repo.iter_commits(f"{default_branch_name}..{branch_local.name}"))
         else:
-            entrada.append("Nenhum commit anterior encontrado.\n")
-            entrada.append("=" * 80 + "\n")
+            print("AVISO: Remote 'origin' não configurado. Analisando os 2 últimos commits locais.", file=sys.stderr)
+            commits_pendentes = list(repo.iter_commits(branch_local, max_count=2))
 
-    with open(caminho_saida, "w", encoding="utf-8") as arquivo_saida:
-        arquivo_saida.write("\n".join(entrada))
+        if not commits_pendentes:
+            print("Nenhum commit novo para analisar foi encontrado.", file=sys.stderr)
+            return False
 
-    print(f"{caminho_saida} gerado com os {len(commits_selecionados)} commits pendentes de push.")
-    return True
+        # Pega o diff consolidado do commit mais antigo para o mais novo
+        commit_base = commits_pendentes[-1].parents[0] if commits_pendentes[-1].parents else None
+        diff_completo = repo.git.diff(commit_base, commits_pendentes[0])
+        
+        entrada = [f"Analisando {len(commits_pendentes)} commit(s).\n\nMensagens de commit:\n"]
+        for commit in reversed(commits_pendentes):
+            entrada.append(f"- {commit.message.strip()}")
+        entrada.append(f"\n{'='*80}\nDiferenças de código consolidadas a serem analisadas:\n{diff_completo}")
+
+        with open(caminho_saida, "w", encoding="utf-8") as arquivo_saida:
+            arquivo_saida.write("\n".join(entrada))
+        return True
+    except Exception as e:
+        print(f"Ocorreu um erro inesperado em 'entradagit.py': {e}", file=sys.stderr)
+        return False
+
+def obter_mudancas_staged(repo_path="."):
+    try:
+        repo = Repo(repo_path, search_parent_directories=True)
+        diff_staged = repo.git.diff('--cached')
+        if not diff_staged:
+            print("Nenhuma mudança na 'staging area' para analisar.", file=sys.stderr)
+            return None
+        return f"Analisando as seguintes mudanças de código que estão na 'staging area':\n\n{diff_staged}"
+    except Exception as e:
+        print(f"Erro em 'entradagit.py' ao obter staged changes: {e}", file=sys.stderr)
+        return None

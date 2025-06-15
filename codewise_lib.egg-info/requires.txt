@@ -3,4 +3,4 @@ python-dotenv
 gitpython
 pyyaml
 google-generativeai
-langchain-google-genai  
+langchain-google-genai

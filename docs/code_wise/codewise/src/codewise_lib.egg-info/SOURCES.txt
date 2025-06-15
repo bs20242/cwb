@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+setup.py
+docs/code_wise/codewise/src/codewise_lib.egg-info/PKG-INFO
+docs/code_wise/codewise/src/codewise_lib.egg-info/SOURCES.txt
+docs/code_wise/codewise/src/codewise_lib.egg-info/dependency_links.txt
+docs/code_wise/codewise/src/codewise_lib.egg-info/requires.txt
+docs/code_wise/codewise/src/codewise_lib.egg-info/top_level.txt
+docs/code_wise/codewise/src/codewise/__init__.py
+docs/code_wise/codewise/src/codewise/crew.py
+docs/code_wise/codewise/src/codewise/cw_runner.py
+docs/code_wise/codewise/src/codewise/entradagit.py
+docs/code_wise/codewise/src/codewise/main.py
+docs/code_wise/codewise/src/codewise/tools/__init__.py
+docs/code_wise/codewise/src/codewise_lib.egg-info/SOURCES.txt
