@@ -19,26 +19,37 @@ Antes de começar, garanta que você tenha as seguintes ferramentas instaladas e
 Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, siga estes passos:
 
 1.  Clone este repositório:
-    ```bash
+    ```
     git clone [https://github.com/bs20242/cwb.git](https://github.com/bs20242/cwb.git) CodeWise
     ```
 2.  Navegue até a pasta do projeto:
-    ```bash
+    ```
     win: cd C:\Users\SeuUsuario\CodeWise
     linux: cd /c/Users/SeuUsuario/CodeWise
 
-2.1  Crie e ative o ambiente virtual:
-    ```bash
-    # Cria a pasta do ambiente virtual
-    py -m venv .venv
+Passo 2.1: Crie e Utilize um Ambiente Virtual (Recomendado)
+Para evitar conflitos com outros projetos Python, é altamente recomendado usar um ambiente virtual. Pense nisso como uma "caixa de ferramentas" isolada apenas para este projeto, mantendo seu sistema principal limpo.
 
-    # Ativa o ambiente (o prompt do seu terminal deve mudar)
-    # No Windows (PowerShell/CMD):
-    .\.venv\Scripts\activate
-    ```
-    ```
+ 2.1.1. Para Criar o Ambiente:
+Execute este comando uma única vez. Ele cria uma pasta chamada .venv com uma instalação limpa do Python dentro.
+
+py -m venv .venv
+
+ 2.1.2. Para Ativar o Ambiente:
+Sempre que for trabalhar no projeto, você precisa ativar o ambiente.
+
+# No Windows (PowerShell/CMD):
+.\.venv\Scripts\activate
+Você saberá que funcionou porque o início da linha do seu terminal mudará, mostrando (.venv) antes do caminho.
+
+ 2.1.3. Para Desativar o Ambiente (Fechar a "Caixa de Ferramentas"):
+Quando terminar de trabalhar, você pode desativar o ambiente simplesmente digitando:
+
+deactivate
+O (.venv) desaparecerá do seu terminal, indicando que você voltou ao seu sistema normal.
+
 3.  Instale as dependências e a ferramenta:
-    ```bash
+    ```
     # Instala pacotes como CrewAI, etc.
     py -m pip install -r requirements.txt
 
@@ -46,6 +57,7 @@ Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, s
     py -m pip install -e .
     ```
 ## se quiser criar um novo repositorio na máquina pelo prompt:
+
 ( mkdir MeuNovoProjeto 
 cd MeuNovoProjeto
 git init
@@ -64,7 +76,7 @@ Para cada repositório Git em que você desejar usar a automação, basta fazer 
 
 #### **Passo 1: Navegue até o seu Repositório**
 
-```bash
+```
 # Exemplo: configurando para o projeto C_lib
 cd /caminho/para/seu/C_lib
 ```
@@ -77,24 +89,37 @@ codewise-init --all
 Você verá uma mensagem de sucesso confirmando que a automação está ativa.
 *(**Opcional:** use `--commit` para ativar apenas a análise rápida ou `--push` para ativar apenas a automação de PR).*
 
+Antes de usar a ferramenta, você precisa configurar sua chave de API do Google Gemini. Este processo é feito localmente e de forma segura, sem expor sua chave no código.
+
+ Crie o Arquivo de Ambiente (.env)
+
+A chave de API é lida de um arquivo chamado `.env` localizado na pasta principal da biblioteca. Primeiro, navegue até o diretório correto. A partir da raiz do projeto, o caminho é:
+
+"cd docs/code_wise/codewise/src/codewise" há um exemplo de .env em formato txt que você pode copiar o conteúdo dentro.
+
+abra o terminal no local onde se encontra o crew.py, após ter copiado o conteúdo do exemplo use: "notepad .env"/"touch .env" (Linux) 
+ aceite criar um novo arquivo e cole o conteúdo dentro, e adicione sua API key do gemini.
+
+
 ## Fluxo de Trabalho do Dia a Dia
 Com a configuração concluída, seu fluxo de trabalho se torna mais inteligente:
 
 1.  Trabalhe normalmente em uma branch separada (ex: `minha-feature`).
 2.  Adicione suas alterações para o próximo commit:
-    ```bash
+    ```
     git add .
     ```
 3.  Faça o commit:
-    ```bash
+    ```
     git commit -m "feat: implementa novo recurso X"
     ```
     Neste momento, o **hook `pre-commit` será ativado**. Você verá a análise rápida do `codewise-lint` aparecer no seu terminal com sugestões de melhoria antes mesmo de o commit ser finalizado.
 
 4.  Envie suas alterações para o GitHub:
-    ```bash
+    ```
     git push
     ```
+ se for a primeira vez use com --no-verify para não usar o programa ainda! (git push origin master --no-verify) (git push --set-upstream origin teste )
     Agora, o **hook `pre-push` será ativado**. O `codewise-pr` irá criar ou atualizar seu Pull Request no GitHub com título, descrição e um comentário de análise técnica, tudo gerado por IA.
 
 ---

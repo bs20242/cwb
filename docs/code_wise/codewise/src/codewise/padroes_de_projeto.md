@@ -1,314 +1,209 @@
 ```markdown
-# Análise e Aplicação de Padrões de Projeto
+# padroes_de_projeto.md
 
-Este documento analisa a aplicação de padrões de projeto GoF (Gang of Four) no contexto das mudanças recentes no projeto e propõe melhorias para promover modularidade e baixo acoplamento.
+## Análise e Aplicação de Padrões de Projeto - Commit "att somas"
 
-**Commits Analisados:**
+Este documento analisa o commit "att somas" e propõe a aplicação de padrões de projeto para melhorar a modularidade, o baixo acoplamento e a testabilidade do código. Ele complementa os relatórios de arquitetura, heurísticas e princípios SOLID já elaborados.
 
-*   "feature(R2D2-0): #comment ajustes para automatizar tudo e novas funções"
+### 1. Sumário do Commit
 
-**Resumo das Alterações:**
+O commit "att somas" modifica o arquivo `teste.py`, adicionando múltiplas chamadas à função `somar` da biblioteca `c_lib` e introduzindo importações redundantes da mesma.
 
-*   Adição do arquivo `.github/PULL_REQUEST_TEMPLATE.md` para padronizar os Pull Requests.
-*   Modificação do arquivo `.gitignore` (binário).
-*   Alterações no `Makefile` para simplificar a execução e adicionar comandos de limpeza.
-*   Reestruturação completa do `README.md` para incluir instruções de instalação, uso e funcionalidades.
-*   Criação de arquivos relacionados ao empacotamento (`codewise_lib.egg-info`).
-*   Remoção do arquivo `docs/code_wise/codewise/src/codewise/README.md`.
-*   Criação de arquivos de análise (`analise_heuristicas_integracoes.md`, `analise_solid.md`, `arquitetura_atual.md`, `padroes_de_projeto.md`).
-*   Modificações significativas nos scripts Python (`crew.py`, `cw_runner.py`, `entradagit.py`, `main.py`, `install_hook.py`, `codewise_review_win.py`).
-*   Atualização do `requirements.txt` para incluir `langchain-google-genai`.
-*   Remoção do diretório `docs/code_wise/codewise/src/codewise/tools`.
-*   Alterações no `setup.py` para incluir novos entry points e informações de empacotamento.
+### 2. Padrões de Projeto Relevantes
 
-## Padrões de Projeto Aplicáveis
+Considerando o contexto do commit e os relatórios anteriores, os seguintes padrões de projeto são relevantes para melhorar o design:
 
-Com base na arquitetura atual, nas sugestões de melhoria da análise SOLID, e visando a modularidade e baixo acoplamento, os seguintes padrões de projeto podem ser aplicados:
+*   **Singleton:** Não aplicável diretamente. O padrão Singleton garante que uma classe tenha apenas uma instância e fornece um ponto de acesso global a ela. Não há necessidade de garantir uma única instância da função `somar` ou da biblioteca `c_lib`.
 
-### 1. Factory Method
+*   **Strategy:** Aplicável para permitir diferentes implementações da operação de soma.
 
-*   **Problema:** A criação de instâncias de agentes (como definido in `crew.py`) diretamente dentro de `cw_runner.py` acopla as classes, dificultando a testabilidade e flexibilidade para adicionar novos tipos de agentes.
-*   **Solução:** Implementar o padrão Factory Method para delegar a criação de agentes a uma classe factory, permitindo a criação de agentes sem expor a lógica de instanciação.
+*   **Factory Method/Abstract Factory:**  Aplicável para criar instâncias de diferentes implementações da operação de soma.
+
+*   **Dependency Injection:** Aplicável para reduzir o acoplamento entre `teste.py` e a implementação concreta da função `somar`.
+
+*   **Module Pattern:** Aplicável para organizar o código em módulos coesos e bem definidos.
+
+### 3. Análise Detalhada e Sugestões de Aplicação
+
+#### 3.1. Strategy Pattern
+
+*   **Problema:** O código atual tem apenas uma implementação da operação de soma. Se precisarmos adicionar outras operações (subtração, multiplicação, etc.) ou diferentes algoritmos de soma, o código precisaria ser modificado diretamente.
+*   **Solução:** Definir uma interface (ou classe abstrata) para a operação aritmética e criar classes concretas que implementem essa interface para cada operação específica.
 *   **Implementação:**
 
-    1.  Criar uma interface `AgentFactory` com um método `create_agent(agent_type, config, llm)`
-    2.  Criar classes concretas para cada tipo de agente (e.g., `SeniorArchitectFactory`, `QualityConsultantFactory`) que implementam a interface `AgentFactory`. Cada factory sabe como instanciar seu agente específico.
-    3.  Modificar `cw_runner.py` para usar a `AgentFactory` para criar os agentes, em vez de instanciá-los diretamente.
-*   **Exemplo:**
+    1.  **Definir a Interface:**
 
-```python
-# codewise_lib/agents/agent_factory.py
-from abc import ABC, abstractmethod
-from crewai import Agent
-from codewise_lib import crew  # Importa o módulo 'crew'
+        ```python
+        from abc import ABC, abstractmethod
 
-class AgentFactory(ABC):
-    @abstractmethod
-    def create_agent(self, agent_type: str, config: dict, llm):
-        pass
+        class IOperacao(ABC):
+            @abstractmethod
+            def executar(self, a, b):
+                pass
+        ```
 
-class SeniorArchitectFactory(AgentFactory):
-    def create_agent(self, config: dict, llm):
-        return Agent(config=config['senior_architect'], llm=llm, verbose=False)
+    2.  **Implementar as Estratégias Concretas:**
 
-class QualityConsultantFactory(AgentFactory):
-    def create_agent(self, config: dict, llm):
-        return Agent(config=config['quality_consultant'], llm=llm, verbose=False)
+        ```python
+        class Soma(IOperacao):
+            def executar(self, a, b):
+                return a + b
 
-# Adicione outras fábricas de agentes conforme necessário
+        class Subtracao(IOperacao):
+            def executar(self, a, b):
+                return a - b
+        ```
 
-# cw_runner.py (exemplo de uso)
-from codewise_lib.agents.agent_factory import SeniorArchitectFactory, QualityConsultantFactory  # Importa as fábricas
-# ...
-architect_factory = SeniorArchitectFactory()
-architect_agent = architect_factory.create_agent(codewise_instance.agents_config, codewise_instance.llm)
+    3.  **Contexto (teste.py):**
 
-quality_factory = QualityConsultantFactory()
-quality_agent = quality_factory.create_agent(codewise_instance.agents_config, codewise_instance.llm)
+        ```python
+        def calcular(a, b, operacao: IOperacao):
+            return operacao.executar(a, b)
 
-```
+        soma = Soma()
+        subtracao = Subtracao()
 
-*   **Benefícios:** Isola a criação de objetos Agent, facilita a manutenção, permite a adição de novos tipos de agentes sem modificar o código existente, e promove a testabilidade (é possível mockar a fábrica nos testes).
+        resultado_soma = calcular(5, 3, soma)
+        resultado_subtracao = calcular(10, 2, subtracao)
 
-### 2. Strategy
+        print(f"Soma: {resultado_soma}")
+        print(f"Subtração: {resultado_subtracao}")
+        ```
 
-*   **Problema:**  O processo de obtenção de dados do Git (em `entradagit.py`) pode variar dependendo da fonte (e.g., commits locais, branch remota, diff staged). A lógica atual pode se tornar complexa com a adição de novos tipos de fontes.
-*   **Solução:** Implementar o padrão Strategy para encapsular diferentes algoritmos de obtenção de dados do Git em classes separadas.
+*   **Benefícios:**
+    *   Permite adicionar novas operações sem modificar o código existente (Open/Closed Principle).
+    *   Promove a reutilização de código.
+    *   Torna o código mais flexível e fácil de manter.
+
+#### 3.2. Factory Method/Abstract Factory Pattern
+
+*   **Problema:** A criação de objetos `Soma`, `Subtracao` etc. no `teste.py` acopla o código à implementação concreta.
+*   **Solução:** Usar um Factory Method ou Abstract Factory para abstrair o processo de criação dos objetos `IOperacao`.
+*   **Implementação (Factory Method):**
+
+    ```python
+    from abc import ABC, abstractmethod
+
+    class IOperacao(ABC):
+        @abstractmethod
+        def executar(self, a, b):
+            pass
+
+    class Soma(IOperacao):
+        def executar(self, a, b):
+            return a + b
+
+    class Subtracao(IOperacao):
+        def executar(self, a, b):
+            return a - b
+
+    class OperacaoFactory(ABC):
+        @abstractmethod
+        def criar_operacao(self) -> IOperacao:
+            pass
+
+    class SomaFactory(OperacaoFactory):
+        def criar_operacao(self) -> IOperacao:
+            return Soma()
+
+    class SubtracaoFactory(OperacaoFactory):
+        def criar_operacao(self) -> IOperacao:
+            return Subtracao()
+
+
+    def calcular(a, b, factory: OperacaoFactory):
+        operacao = factory.criar_operacao()
+        return operacao.executar(a, b)
+
+
+    soma_factory = SomaFactory()
+    subtracao_factory = SubtracaoFactory()
+
+    resultado_soma = calcular(5, 3, soma_factory)
+    resultado_subtracao = calcular(10, 2, subtracao_factory)
+
+    print(f"Soma: {resultado_soma}")
+    print(f"Subtração: {resultado_subtracao}")
+
+    ```
+
+*   **Benefícios:**
+    *   Desacopla a criação de objetos do código que os utiliza.
+    *   Facilita a substituição de implementações.
+    *   Promove a flexibilidade e a extensibilidade do código.
+
+#### 3.3. Dependency Injection Pattern
+
+*   **Problema:** `teste.py` depende diretamente da implementação concreta da função `somar` (ou das classes `Soma`, `Subtracao` se o padrão Strategy for aplicado).
+*   **Solução:** Injetar a dependência (a função `somar` ou a instância de `IOperacao`) no `teste.py` (ou nas funções que a utilizam) em vez de importá-la diretamente.
+*   **Implementação (usando o padrão Strategy):**
+
+    ```python
+    from abc import ABC, abstractmethod
+
+    class IOperacao(ABC):
+        @abstractmethod
+        def executar(self, a, b):
+            pass
+
+    class Soma(IOperacao):
+        def executar(self, a, b):
+            return a + b
+
+    def calcular(a, b, operacao: IOperacao):  # Injeção de Dependência
+        return operacao.executar(a, b)
+
+
+    soma = Soma()
+
+
+    resultado_soma = calcular(5, 3, soma)  # Injeção da dependência 'soma'
+    print(f"Soma: {resultado_soma}")
+    ```
+
+*   **Benefícios:**
+    *   Reduz o acoplamento entre os componentes.
+    *   Facilita a testabilidade do código (permite o uso de mocks).
+    *   Aumenta a flexibilidade e a reutilização do código.
+
+#### 3.4. Module Pattern
+
+*   **Problema:** Código não organizado em módulos.
+*   **Solução:** Dividir o código em módulos lógicos (e.g., `aritmetica.py`, `main.py`, `testes.py`).
 *   **Implementação:**
 
-    1.  Definir uma interface `GitDataProvider` com um método `get_data(repo_path, branch_name)`.
-    2.  Criar classes concretas para cada estratégia de obtenção de dados (e.g., `LocalCommitDataProvider`, `RemoteBranchDataProvider`, `StagedChangesDataProvider`) que implementam a interface `GitDataProvider`.
-    3.  Modificar `entradagit.py` para aceitar uma instância de `GitDataProvider` e usar seu método `get_data` para obter os dados do Git.
+    1.  **Criar módulos:**
+        *   `aritmetica.py`: Contém as interfaces e implementações das operações aritméticas (IOperacao, Soma, Subtracao, etc.).
+        *   `main.py`: Contém a lógica principal do programa (a função `calcular` e as chamadas para exibir os resultados).
+        *   `testes.py`: Contém os testes unitários.
 
-*   **Exemplo:**
+    2.  **Importar os módulos:**
 
-```python
-# codewise_lib/git/git_data_provider.py
-from abc import ABC, abstractmethod
-from git import Repo, GitCommandError
-import sys
+        ```python
+        # main.py
+        from aritmetica import Soma
+        from aritmetica import Subtracao
 
-class GitDataProvider(ABC):
-    @abstractmethod
-    def get_data(self, repo_path, branch_name):
-        pass
+        def calcular(a, b, operacao):
+            return operacao.executar(a, b)
 
-class LocalCommitDataProvider(GitDataProvider):
-    def get_data(self, repo_path, branch_name):
-        try:
-            repo = Repo(repo_path, search_parent_directories=True)
-            if branch_name not in repo.heads:
-                print(f"Branch local '{branch_name}' não encontrada.", file=sys.stderr)
-                return None
-            branch_local = repo.heads[branch_name]
-            commits_pendentes = []
 
-            if 'origin' in repo.remotes:
-                try:
-                    repo.remotes.origin.fetch(prune=True)
-                    branch_remota_ref = f'origin/{branch_local.name}'
-                    commits_pendentes = list(repo.iter_commits(f"{branch_remota_ref}..{branch_local.name}"))
-                except GitCommandError:
-                    default_branch_name = "main" if 'main' in repo.heads else 'master'
-                    print(f"AVISO: Branch '{branch_local.name}' não encontrada no remote. Comparando com a branch '{default_branch_name}'.", file=sys.stderr)
-                    commits_pendentes = list(repo.iter_commits(f"{default_branch_name}..{branch_local.name}"))
-            else:
-                print("AVISO: Remote 'origin' não configurado. Analisando os 2 últimos commits locais.", file=sys.stderr)
-                commits_pendentes = list(repo.iter_commits(branch_local, max_count=2))
+        soma = Soma()
+        subtracao = Subtracao()
 
-            if not commits_pendentes:
-                print("Nenhum commit novo para analisar foi encontrado.", file=sys.stderr)
-                return None
+        resultado_soma = calcular(5, 3, soma)
+        resultado_subtracao = calcular(10, 2, subtracao)
 
-            # Pega o diff consolidado do commit mais antigo para o mais novo
-            commit_base = commits_pendentes[-1].parents[0] if commits_pendentes[-1].parents else None
-            diff_completo = repo.git.diff(commit_base, commits_pendentes[0])
+        print(f"Soma: {resultado_soma}")
+        print(f"Subtração: {resultado_subtracao}")
+        ```
 
-            entrada = [f"Analisando {len(commits_pendentes)} commit(s).\n\nMensagens de commit:\n"]
-            for commit in reversed(commits_pendentes):
-                entrada.append(f"- {commit.message.strip()}")
-            entrada.append(f"\n{'='*80}\nDiferenças de código consolidadas a serem analisadas:\n{diff_completo}")
+*   **Benefícios:**
+    *   Melhora a organização do código.
+    *   Aumenta a modularidade e a reutilização.
+    *   Facilita a manutenção e a compreensão do código.
 
-            return "\n".join(entrada)
-        except Exception as e:
-            print(f"Ocorreu um erro inesperado ao obter dados do Git: {e}", file=sys.stderr)
-            return None
+### 4. Conclusão
 
-class StagedChangesDataProvider(GitDataProvider):
-    def get_data(self, repo_path, branch_name):
-        try:
-            repo = Repo(repo_path, search_parent_directories=True)
-            diff_staged = repo.git.diff('--cached')
-            if not diff_staged:
-                print("Nenhuma mudança na 'staging area' para analisar.", file=sys.stderr)
-                return None
-            return f"Analisando as seguintes mudanças de código que estão na 'staging area':\n\n{diff_staged}"
-        except Exception as e:
-            print(f"Erro ao obter staged changes: {e}", file=sys.stderr)
-            return None
-
-# entradagit.py (exemplo de uso)
-from codewise_lib.git.git_data_provider import LocalCommitDataProvider, StagedChangesDataProvider
-
-def gerar_entrada_automatica(caminho_repo, caminho_saida, nome_branch, data_provider: GitDataProvider):
-    data = data_provider.get_data(caminho_repo, nome_branch)
-    if data:
-        with open(caminho_saida, "w", encoding="utf-8") as arquivo_saida:
-            arquivo_saida.write(data)
-        return True
-    return False
-
-def obter_mudancas_staged(repo_path="."):
-    provider = StagedChangesDataProvider()
-    return provider.get_data(repo_path, None) # Branch não relevante para staged changes
-```
-
-*   **Benefícios:** Promove a separação de responsabilidades, facilita a adição de novas fontes de dados Git, e permite a troca dinâmica de algoritmos.
-
-### 3. Observer
-
-*   **Problema:** O script `codewise_review_win.py` executa diversas ações (executa a IA, edita/cria PR, comenta no PR). Se quisermos adicionar novas ações (e.g., enviar notificações por Slack), precisaríamos modificar o script, violando o OCP.
-*   **Solução:** Implementar o padrão Observer para permitir que outros componentes se inscrevam para receber notificações quando a análise for concluída e o PR for atualizado.
-*   **Implementação:**
-
-    1.  Definir uma interface `CodeWiseObserver` com um método `update(pr_number, analysis_results)`.
-    2.  Criar classes concretas para cada observador (e.g., `GithubCommenter`, `SlackNotifier`) que implementam a interface `CodeWiseObserver`.
-    3.  Modificar `codewise_review_win.py` para manter uma lista de observadores e notificá-los quando a análise for concluída e o PR for atualizado.
-*   **Exemplo:**
-
-```python
-# scripts/codewise_observer.py
-from abc import ABC, abstractmethod
-
-class CodeWiseObserver(ABC):
-    @abstractmethod
-    def update(self, pr_number, analysis_results):
-        pass
-
-class GithubCommenter(CodeWiseObserver):
-    def update(self, pr_number, analysis_results):
-        # Lógica para comentar no PR do GitHub
-        subprocess.run(["gh", "pr", "comment", str(pr_number), "--body-file", analysis_results], check=True, capture_output=True, text=True, encoding='utf-8', cwd=repo_path)
-
-class SlackNotifier(CodeWiseObserver):
-    def update(self, pr_number, analysis_results):
-        # Lógica para enviar notificação no Slack
-        # (Requer implementação da integração com o Slack)
-        pass
-
-# codewise_review_win.py (exemplo de uso)
-from scripts.codewise_observer import GithubCommenter, SlackNotifier
-
-# ... dentro da função main_pr ...
-github_commenter = GithubCommenter()
-#slack_notifier = SlackNotifier() #Implementar a classe SlackNotifier para funcionar
-
-# Notifica os observadores
-github_commenter.update(pr_numero, temp_analise_path)
-#slack_notifier.update(pr_numero, temp_analise_path) #Descomentar quando SlackNotifier estiver implementado
-```
-
-*   **Benefícios:** Promove o baixo acoplamento, permite a adição de novas funcionalidades (e.g., notificações, auditoria) sem modificar o código existente em `codewise_review_win.py`, e facilita a manutenção.
-
-### 4. Dependency Injection
-
-*   **Problema:**  As classes em `cw_runner.py` e `codewise_review_win.py` têm dependências fixas, dificultando a testabilidade e a substituição de implementações.
-*   **Solução:** Aplicar o padrão de Injeção de Dependência para fornecer as dependências de um componente externamente, em vez de criá-las internamente.
-*   **Implementação:**
-
-    1.  Usar um container de injeção de dependência (e.g., implementado manualmente ou usando uma biblioteca como `injector`).
-    2.  Definir interfaces para as dependências (e.g., `AgentFactory`, `GitDataProvider`, `CodeWiseObserver`).
-    3.  Configurar o container para fornecer as implementações concretas das dependências.
-    4.  Injetar as dependências nos construtores das classes que as utilizam.
-*   **Exemplo:**
-
-```python
-# (Exemplo simplificado sem um container de DI externo)
-# cw_runner.py
-class CodewiseRunner:
-    def __init__(self, agent_factory: AgentFactory, git_data_provider: GitDataProvider):
-        self.agent_factory = agent_factory
-        self.git_data_provider = git_data_provider
-
-    def executar(self, caminho_repo: str, nome_branch: str, modo: str):
-        # Usa self.git_data_provider para obter os dados do Git
-        # Usa self.agent_factory para criar os agentes
-
-# Em main.py ou codewise_review_win.py
-agent_factory = SeniorArchitectFactory() #Ou outra implementação de AgentFactory
-git_data_provider = LocalCommitDataProvider() #Ou outra implementação de GitDataProvider
-runner = CodewiseRunner(agent_factory, git_data_provider)
-runner.executar(...)
-```
-
-*   **Benefícios:** Facilita o teste, a reutilização e a manutenção do código, promove o baixo acoplamento e permite a troca fácil de implementações.
-
-### 5. Template Method
-
-*   **Problema:** A estrutura geral do processo de análise (em `cw_runner.py`) é sempre a mesma (obter dados, criar agentes, executar tarefas, gerar relatório), mas os detalhes de cada etapa podem variar.
-*   **Solução:** Aplicar o padrão Template Method para definir a estrutura do processo de análise em uma classe base e permitir que as subclasses implementem os detalhes de cada etapa.
-*   **Implementação:**
-
-    1.  Criar uma classe abstrata `AnalysisProcess` com um método `run()` que define a estrutura geral do processo de análise.
-    2.  Definir métodos abstratos para cada etapa do processo (e.g., `get_data()`, `create_agents()`, `execute_tasks()`, `generate_report()`).
-    3.  Criar classes concretas para cada tipo de análise (e.g., `PullRequestAnalysis`, `CommitAnalysis`) que implementam os métodos abstratos.
-*   **Exemplo:**
-
-```python
-# codewise_lib/analysis/analysis_process.py
-from abc import ABC, abstractmethod
-
-class AnalysisProcess(ABC):
-    def run(self, repo_path, branch_name, mode):
-        data = self.get_data(repo_path, branch_name)
-        agents = self.create_agents()
-        report = self.execute_tasks(agents, data, mode)
-        self.generate_report(report)
-
-    @abstractmethod
-    def get_data(self, repo_path, branch_name):
-        pass
-
-    @abstractmethod
-    def create_agents(self):
-        pass
-
-    @abstractmethod
-    def execute_tasks(self, agents, data, mode):
-        pass
-
-    @abstractmethod
-    def generate_report(self, report):
-        pass
-
-# cw_runner.py (exemplo de uso)
-from codewise_lib.analysis.analysis_process import AnalysisProcess
-
-class PullRequestAnalysis(AnalysisProcess):
-    def get_data(self, repo_path, branch_name):
-        # Implementação específica para obter dados de um Pull Request
-        pass
-
-    def create_agents(self):
-        # Implementação específica para criar agentes para um Pull Request
-        pass
-
-    def execute_tasks(self, agents, data, mode):
-        # Implementação específica para executar tarefas para um Pull Request
-        pass
-
-    def generate_report(self, report):
-        # Implementação específica para gerar um relatório para um Pull Request
-        pass
-
-# Em main.py ou codewise_review_win.py
-analysis_process = PullRequestAnalysis()
-analysis_process.run(repo_path, branch_name, mode)
-```
-
-*   **Benefícios:** Promove a reutilização de código, facilita a extensão do processo de análise e permite a criação de diferentes tipos de análises sem modificar a estrutura geral.
-
-## Conclusão
-
-A aplicação desses padrões de projeto pode melhorar significativamente a modularidade, o baixo acoplamento e a testabilidade do projeto CodeWise. Ao adotar uma arquitetura orientada a padrões, o código se torna mais fácil de entender, manter e estender. A escolha dos padrões de projeto deve ser feita com base nas necessidades específicas do projeto e nos princípios de design SOLID. Implementar esses padrões, combinados com as sugestões da análise SOLID e da análise arquitetural, levará a um sistema mais robusto e adaptável.
+A aplicação dos padrões de projeto Strategy, Factory Method/Abstract Factory, Dependency Injection e Module Pattern pode melhorar significativamente a qualidade, a flexibilidade e a testabilidade do código no commit "att somas". Ao seguir esses padrões, o código se torna mais fácil de manter, estender e reutilizar, além de estar mais alinhado com os princípios SOLID.
 ```
