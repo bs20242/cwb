@@ -14,7 +14,7 @@ Antes de começar, garanta que você tenha as seguintes ferramentas instaladas e
 2.  **Git**
 3.  **GitHub CLI (`gh`)**: Após instalar, autentique-se com o GitHub executando `gh auth login` no seu terminal.
 
-## Instalação (Apenas uma vez)
+####################### Instalação (Apenas uma vez) #########################################
 
 Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, siga estes passos:
 
@@ -27,6 +27,15 @@ Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, s
     win: cd C:\Users\SeuUsuario\CodeWise
     linux: cd /c/Users/SeuUsuario/CodeWise
 
+2.1  Crie e ative o ambiente virtual:
+    ```bash
+    # Cria a pasta do ambiente virtual
+    py -m venv .venv
+
+    # Ativa o ambiente (o prompt do seu terminal deve mudar)
+    # No Windows (PowerShell/CMD):
+    .\.venv\Scripts\activate
+    ```
     ```
 3.  Instale as dependências e a ferramenta:
     ```bash
@@ -46,10 +55,10 @@ git add .
 git commit -m "Primeiro commit"
 git push --set-upstream origin main (ou master, dependendo do seu Git)
 )
-
+#############################################################################################################################################
 Após estes passos, a ferramenta estará instalada e pronta para ser configurada em qualquer um dos seus projetos.
 
-## Como Usar 
+######################## Como Usar #######################################
 
 Para cada repositório Git em que você desejar usar a automação, basta fazer uma configuração inicial de 10 segundos.
 

@@ -92,27 +92,64 @@ def main_pr():
     os.environ['PYTHONIOENCODING'] = 'utf-8'
     repo_path = os.getcwd()
     print(f"📍 Analisando o repositório em: {repo_path}", file=sys.stderr)
+    
     try:
         current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], encoding='utf-8', cwd=repo_path).strip()
     except Exception as e:
         sys.exit(f"❌ Erro ao detectar branch Git: {e}")
+
     base_branch_target = obter_branch_padrao_remota(repo_path)
     if current_branch == base_branch_target:
         sys.exit(f"❌ A automação não pode ser executada na branch principal ('{base_branch_target}').")
-    print("\n---  *Executando IA para documentação do PR* ---", file=sys.stderr)
+
+    print("\n--- 🤖 Executando IA para documentação do PR ---", file=sys.stderr)
     titulo_bruto = run_codewise_mode("titulo", repo_path, current_branch)
     descricao = run_codewise_mode("descricao", repo_path, current_branch)
     analise_tecnica = run_codewise_mode("analise", repo_path, current_branch)
+
     if not all([titulo_bruto, descricao, analise_tecnica]):
         sys.exit("❌ Falha ao gerar todos os textos necessários da IA.")
+
     titulo_final = extrair_titulo_valido(titulo_bruto) or f"feat: Modificações da branch {current_branch}"
     print(f"✔️ Título definido para o PR: {titulo_final}", file=sys.stderr)
+
     temp_analise_path = os.path.join(repo_path, ".codewise_analise_temp.txt")
     with open(temp_analise_path, "w", encoding='utf-8') as f: f.write(analise_tecnica)
+
     pr_numero = obter_pr_aberto_para_branch(current_branch, repo_path)
+
     if pr_numero:
-        print(f"⚠️ PR #{pr_numero} já existente. Atualizando...", file=sys.stderr)
-        subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", descricao], check=False, text=True, capture_output=True, encoding='utf-8', cwd=repo_path)
+        print(f"⚠️ PR #{pr_numero} já existente. Acrescentando nova análise...", file=sys.stderr)
+        try:
+            # 1. Busca a descrição atual do PR
+            print("   - Buscando descrição existente...", file=sys.stderr)
+            descricao_antiga_raw = subprocess.check_output(
+                ["gh", "pr", "view", str(pr_numero), "--json", "body"],
+                cwd=repo_path, text=True, encoding='utf-8'
+            )
+            descricao_antiga = json.loads(descricao_antiga_raw).get("body", "")
+
+            # 2. Prepara a nova entrada com data e hora
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            nova_entrada_descricao = (
+                f"\n\n---\n\n"
+                f"**🔄 Atualização em {timestamp}**\n\n"
+                f"{descricao}"
+            )
+
+            # 3. Concatena a descrição antiga com a nova
+            body_final = descricao_antiga + nova_entrada_descricao
+
+            # 4. Edita o PR com o corpo completo
+            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", body_final], check=False, text=True, capture_output=True, encoding='utf-8', cwd=repo_path)
+            print(f"✅ Descrição do PR #{pr_numero} atualizada com novas informações.")
+
+        except Exception as e:
+            # Se falhar ao buscar a descrição antiga, apenas substitui para não quebrar o fluxo
+            print(f"⚠️ Não foi possível buscar a descrição antiga. Substituindo pela nova. Erro: {e}", file=sys.stderr)
+            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", descricao], check=False, text=True, capture_output=True, encoding='utf-8', cwd=repo_path)
+
     else:
         print("🆕 Nenhum PR aberto. Criando Pull Request...", file=sys.stderr)
         try:
@@ -124,6 +161,7 @@ def main_pr():
             print(f"✅ PR #{pr_numero} criado: {pr_url}", file=sys.stderr)
         except Exception as e:
             os.remove(temp_analise_path); sys.exit(f"❌ Falha ao criar PR: {e}")
+
     if pr_numero:
         print(f"💬 Comentando análise técnica no PR #{pr_numero}...", file=sys.stderr)
         try:
