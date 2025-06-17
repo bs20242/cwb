@@ -1,4 +1,3 @@
-# Arquivo: scripts/codewise_review_win.py
 
 import subprocess
 import os
@@ -12,7 +11,7 @@ import json
 
 def run_codewise_mode(mode, repo_path, branch_name):
     """Executa a IA como um MÓDULO e captura a saída, resolvendo o ImportError."""
-    print(f"\n--- *! Executando IA [modo: {mode}] !* ---", file=sys.stderr)
+    print(f"\n--- *! Executando IA [modo: {mode}] !* ---")
     
     # CORREÇÃO PRINCIPAL: Executamos a 'lib' como um módulo com 'py -m'.
     # Isso faz o Python reconhecer a estrutura do pacote e as importações relativas.
@@ -27,7 +26,7 @@ def run_codewise_mode(mode, repo_path, branch_name):
     try:
         # A pasta raiz do projeto precisa estar no path para o Python encontrar o módulo
         env = os.environ.copy()
-        env['PYTHONPATH'] = f"{os.path.dirname(os.path.dirname(__file__))};{env.get('PYTHONPATH', '')}"
+        env['PYTHONPATH'] = f"{os.path.dirname(os.path.dirname(__file__))}{os.pathsep}{env.get('PYTHONPATH', '')}"
         
         result = subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8', errors='ignore', env=env)
         return result.stdout.strip()

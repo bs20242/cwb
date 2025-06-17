@@ -25,36 +25,39 @@ Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, s
 2.  Navegue até a pasta do projeto:
     ```
     win: cd C:\Users\SeuUsuario\CodeWise
-    linux: cd /c/Users/SeuUsuario/CodeWise
+    linux: cd /c/Users/SeuUsuario/CodeWise (use: git config --global core.autocrlf true <caso o git no Linux/WSL esteja pegando arquivos demais no git status>)
 
 Passo 2.1: Crie e Utilize um Ambiente Virtual (Recomendado)
-Para evitar conflitos com outros projetos Python, é altamente recomendado usar um ambiente virtual. Pense nisso como uma "caixa de ferramentas" isolada apenas para este projeto, mantendo seu sistema principal limpo.
+Para evitar conflitos com outros projetos Python, é altamente recomendado usar um ambiente virtual. Pense nisso apenas para este projeto, mantendo seu sistema principal limpo.
 
  2.1.1. Para Criar o Ambiente:
 Execute este comando uma única vez. Ele cria uma pasta chamada .venv com uma instalação limpa do Python dentro.
 
-py -m venv .venv
+py -m venv .venv / python3 -m venv .venv (Linux)
 
  2.1.2. Para Ativar o Ambiente:
 Sempre que for trabalhar no projeto, você precisa ativar o ambiente.
 
-# No Windows (PowerShell/CMD):
-.\.venv\Scripts\activate
+.\.venv\Scripts\activate ou  source venv/bin/activate
+
 Você saberá que funcionou porque o início da linha do seu terminal mudará, mostrando (.venv) antes do caminho.
 
- 2.1.3. Para Desativar o Ambiente (Fechar a "Caixa de Ferramentas"):
+ 2.1.3. Para Desativar o Ambiente :
 Quando terminar de trabalhar, você pode desativar o ambiente simplesmente digitando:
 
 deactivate
+
 O (.venv) desaparecerá do seu terminal, indicando que você voltou ao seu sistema normal.
+
+# No Windows (PowerShell/CMD) ou WSL/Git bash:
 
 3.  Instale as dependências e a ferramenta:
     ```
-    # Instala pacotes como CrewAI, etc.
-    py -m pip install -r requirements.txt
 
-    # Instala a ferramenta e os comandos 'codewise-pr' e 'codewise-init'
-    py -m pip install -e .
+    # Instala a ferramenta e os comandos 'codewise-pr' e 'codewise-init', ao final também instala os requirements.txt
+
+    py -m pip install -e . / python3 -m pip install -e .
+
     ```
 ## se quiser criar um novo repositorio na máquina pelo prompt:
 
@@ -62,10 +65,12 @@ O (.venv) desaparecerá do seu terminal, indicando que você voltou ao seu siste
 cd MeuNovoProjeto
 git init
 gh repo create MeuNovoProjeto --public --source=. --remote=origin
-# (Crie seu primeiro arquivo, ex: README.md)
+# (Crie seu primeiro arquivo, ex: README.md) echo > README.md
 git add .
 git commit -m "Primeiro commit"
 git push --set-upstream origin main (ou master, dependendo do seu Git)
+nova branch: git checkout -b nome-da-branch enviar para remoto: git push -u origin nome-da-branch
+
 )
 #############################################################################################################################################
 Após estes passos, a ferramenta estará instalada e pronta para ser configurada em qualquer um dos seus projetos.

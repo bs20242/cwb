@@ -8,7 +8,7 @@ except FileNotFoundError:
 
 setup(
     name="codewise_lib",
-    version="2.0.0", # Versão final e estável
+    version="2.0.0", 
     author="BPC",
     description="Uma ferramenta para análise de código e automação de PRs com CrewAI.",
     package_dir={
