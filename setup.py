@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 try:
     with open('requirements.txt', encoding='utf-8') as f:
@@ -7,10 +7,13 @@ except FileNotFoundError:
     required = []
 
 setup(
-    name="codewise_lib",
-    version="2.0.0", 
+    name="codewise",
+    version="2.0.8",
     author="BPC",
-    description="Uma ferramenta para análise de código e automação de PRs com CrewAI.",
+    description="análise de código e automação de PRs com CrewAI.",
+    long_description=open("README.md", encoding="utf-8").read(),  
+    long_description_content_type="text/markdown",  
+
     package_dir={
         'codewise_lib': 'docs/code_wise/codewise/src/codewise',
         'scripts': 'scripts'
@@ -27,6 +30,14 @@ setup(
             'codewise-pr=scripts.codewise_review_win:main_pr',
             'codewise-lint=scripts.codewise_review_win:main_lint',
             'codewise-init=scripts.install_hook:main',
+            'codewise-help=scripts.help:main',
         ],
     },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Code Generators"
+    ],
 )

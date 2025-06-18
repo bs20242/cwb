@@ -1,12 +1,9 @@
+# Arquivo: cw_runner.py (VERSÃO CORRIGIDA)
 import os
 import sys
-# CORREÇÃO: Adicionado o '.' para indicar importações relativas.
 from .crew import Codewise
 from .entradagit import gerar_entrada_automatica, obter_mudancas_staged
 from crewai import Task, Crew
-
-# O restante do arquivo continua EXATAMENTE como na versão anterior.
-# A única mudança é nas duas linhas de importação acima.
 
 class CodewiseRunner:
     def __init__(self):
@@ -14,39 +11,48 @@ class CodewiseRunner:
         self.caminho_entrada = os.path.join(self.BASE_DIR, ".entrada_temp.txt")
 
     def executar(self, caminho_repo: str, nome_branch: str, modo: str):
-        git_diff_content = ""
+        contexto_para_ia = ""
+        
         if modo == 'lint':
-            git_diff_content = obter_mudancas_staged(caminho_repo)
+            resultado_git = obter_mudancas_staged(caminho_repo)
+            
+            if resultado_git is None:
+                print("Nenhum problema aparente detectado.")
+                sys.exit(0)
+            
+            if resultado_git.startswith("AVISO:") or resultado_git.startswith("FALHA:"):
+                print(resultado_git)
+                sys.exit(0)
+            
+            contexto_para_ia = resultado_git
         else:
             if not gerar_entrada_automatica(caminho_repo, self.caminho_entrada, nome_branch):
                 sys.exit(0)
-            git_diff_content = self._ler_arquivo(self.caminho_entrada)
+            contexto_para_ia = self._ler_arquivo(self.caminho_entrada)
         
-        if not git_diff_content:
-            print("Nenhuma mudança encontrada para análise.", file=sys.stderr)
-            sys.exit(0 if modo == 'lint' else 1)
-        
-        codewise_instance = Codewise(commit_message=git_diff_content)
+        codewise_instance = Codewise(commit_message=contexto_para_ia)
         resultado_final = ""
 
         if modo == 'titulo':
             agent = codewise_instance.summary_specialist()
-            task = Task(description=f"Crie um título de PR conciso no padrão Conventional Commits para as seguintes mudanças. A resposta deve ser APENAS o título **obrigatoriamente em Português do Brasil**, sem aspas, acentos graves ou qualquer outro texto:\n{git_diff_content}", expected_output="Um único título de PR.", agent=agent)
+            task = Task(description=f"Crie um título de PR conciso no padrão Conventional Commits para as seguintes mudanças. A resposta deve ser APENAS o título **obrigatoriamente em Português do Brasil**, sem aspas, acentos graves ou qualquer outro texto:\n{contexto_para_ia}", expected_output="Um único título de PR.", agent=agent)
             resultado_final = Crew(agents=[agent], tasks=[task]).kickoff()
 
         elif modo == 'descricao':
             agent = codewise_instance.summary_specialist()
-            task = Task(description=f"Crie uma descrição de um parágrafo **obrigatoriamente em Português do Brasil** para um Pull Request para as seguintes mudanças:\n{git_diff_content}", expected_output="Um único parágrafo de texto.", agent=agent)
+            task = Task(description=f"Crie uma descrição de um parágrafo **obrigatoriamente em Português do Brasil** para um Pull Request para as seguintes mudanças:\n{contexto_para_ia}", expected_output="Um único parágrafo de texto.", agent=agent)
             resultado_final = Crew(agents=[agent], tasks=[task]).kickoff()
 
         elif modo == 'analise':
             analysis_crew = codewise_instance.crew()
-            contexto_analise = analysis_crew.kickoff(inputs={'input': git_diff_content})
+            # O input para a análise profunda é passado aqui
+            contexto_analise = analysis_crew.kickoff(inputs={'input': contexto_para_ia})
             
             resumo_agent = codewise_instance.summary_specialist()
+            
             resumo_task = Task(
-                description="Com base no contexto da análise completa fornecida, crie um 'Resumo Executivo do Pull Request' **obrigatoriamente em Português do Brasil** bem formatado em markdown, com 3-4 bullet points detalhados e com quebras de linha apropriadas **obrigatoriamente em Português do Brasil**.",
-                expected_output="Um resumo executivo em markdown.",
+                description="Com base no contexto da análise completa fornecida, crie um 'Resumo Executivo do Pull Request' **obrigatoriamente em Português do Brasil** bem formatado em markdown, com 3-4 bullet points detalhados...",
+                expected_output="Um resumo executivo em markdown.", # <-- LINHA ADICIONADA
                 agent=resumo_agent,
                 context=analysis_crew.tasks
             )
@@ -54,11 +60,7 @@ class CodewiseRunner:
 
         elif modo == 'lint':
             agent = codewise_instance.quality_consultant()
-            task = Task(
-                description=f"Analise rapidamente as seguintes mudanças de código ('git diff') e aponte APENAS problemas óbvios ou code smells que devem ser **obrigatoriamente em Português do Brasil**. Seja conciso. Se não houver problemas, retorne 'Nenhum problema aparente detectado **obrigatoriamente em Português do Brasil**.'.\n\nCódigo a ser analisado:\n{git_diff_content}",
-                expected_output="Uma lista curta em bullet points com sugestões, ou uma mensagem de que está tudo ok.",
-                agent=agent
-            )
+            task = Task(description=f"Analise rapidamente as seguintes mudanças de código ('git diff') e aponte APENAS problemas óbvios ou code smells. Seja conciso. A resposta deve ser **em Português do Brasil** Se não houver problemas, retorne 'Nenhum problema aparente detectado.'.\n\nCódigo a ser analisado:\n{contexto_para_ia}", expected_output="Uma lista curta em bullet points com sugestões, ou uma mensagem de que está tudo ok.", agent=agent)
             resultado_final = Crew(agents=[agent], tasks=[task]).kickoff()
         
         if os.path.exists(self.caminho_entrada):

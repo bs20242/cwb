@@ -7,107 +7,117 @@ CodeWise- é uma ferramenta de linha de comando que utiliza o poder de modelos d
 - **Análise Técnica:** Posta um comentário no PR com um resumo executivo das melhorias de arquitetura, aderência a princípios S.O.L.I.D. e outros pontos de qualidade.
 - **Automação Completa:** Integra-se ao seu fluxo de trabalho Git para rodar automaticamente a cada `git push`.
 
-## Pré-requisitos
+## Pré-requisitos para serem instalados antes de tudo
 
 Antes de começar, garanta que você tenha as seguintes ferramentas instaladas em seu sistema:
 1.  **Python** (versão 3.11 ou superior)
 2.  **Git**
-3.  **GitHub CLI (`gh`)**: Após instalar, autentique-se com o GitHub executando `gh auth login` no seu terminal.
+3.  **GitHub CLI (`gh`)**: Após instalar, logue com sua conta do GitHub executando "gh auth login" no seu terminal. (só precisa uma vez no pc)
 
-####################### Instalação (Apenas uma vez) #########################################
+==============================================================================================================================================================================
+# COMO INSTALAR
 
-Para instalar a ferramenta CodeWise-PR e suas dependências no seu computador, siga estes passos:
+## Após instalar os pré requisitos, aqui está como funciona a criação do ambiente virtual no repositório que for usar, para evitar conflitos das dependências de lib.
 
-1.  Clone este repositório:
-    ```
-    git clone [https://github.com/bs20242/cwb.git](https://github.com/bs20242/cwb.git) CodeWise
-    ```
-2.  Navegue até a pasta do projeto:
-    ```
-    win: cd C:\Users\SeuUsuario\CodeWise
-    linux: cd /c/Users/SeuUsuario/CodeWise (use: git config --global core.autocrlf true <caso o git no Linux/WSL esteja pegando arquivos demais no git status>)
+1) - Você fará isso apenas uma vez no repositório novo --> Escolha um repositório git já configurado, abra o terminal na raiz e comece:
 
-Passo 2.1: Crie e Utilize um Ambiente Virtual (Recomendado)
+# Crie e Utilize um Ambiente Virtual 
 Para evitar conflitos com outros projetos Python, é altamente recomendado usar um ambiente virtual. Pense nisso apenas para este projeto, mantendo seu sistema principal limpo.
 
- 2.1.1. Para Criar o Ambiente:
+1.1. Para Criar o Ambiente:
 Execute este comando uma única vez. Ele cria uma pasta chamada .venv com uma instalação limpa do Python dentro.
 
 py -m venv .venv / python3 -m venv .venv (Linux)
 
- 2.1.2. Para Ativar o Ambiente:
+1.2. Para Ativar o Ambiente:
 Sempre que for trabalhar no projeto, você precisa ativar o ambiente.
 
 .\.venv\Scripts\activate ou  source venv/bin/activate
 
-Você saberá que funcionou porque o início da linha do seu terminal mudará, mostrando (.venv) antes do caminho.
+Você saberá que funcionou porque o início da linha do seu terminal mudará, mostrando (.venv) antes do caminho ou o nome que foi escolhido.
 
- 2.1.3. Para Desativar o Ambiente :
-Quando terminar de trabalhar, você pode desativar o ambiente simplesmente digitando:
+1.3. Para Desativar o Ambiente :
+
+Quando terminar de usar, você pode desativar o ambiente simplesmente digitando:
 
 deactivate
 
-O (.venv) desaparecerá do seu terminal, indicando que você voltou ao seu sistema normal.
+O (.venv) desaparecerá do seu terminal, indicando que você voltou ao seu sistema normal sem a lib.
 
-# No Windows (PowerShell/CMD) ou WSL/Git bash:
+=========================================================================================================================================================================================
 
-3.  Instale as dependências e a ferramenta:
-    ```
+Para cada repositório Git em que você desejar usar a automação, basta fazer uma configuração inicial.
 
-    # Instala a ferramenta e os comandos 'codewise-pr' e 'codewise-init', ao final também instala os requirements.txt
+## **Passo 1: vá até o seu Repositório**
 
-    py -m pip install -e . / python3 -m pip install -e .
-
-    ```
-## se quiser criar um novo repositorio na máquina pelo prompt:
-
-( mkdir MeuNovoProjeto 
-cd MeuNovoProjeto
-git init
-gh repo create MeuNovoProjeto --public --source=. --remote=origin
-# (Crie seu primeiro arquivo, ex: README.md) echo > README.md
-git add .
-git commit -m "Primeiro commit"
-git push --set-upstream origin main (ou master, dependendo do seu Git)
-nova branch: git checkout -b nome-da-branch enviar para remoto: git push -u origin nome-da-branch
-
-)
-#############################################################################################################################################
-Após estes passos, a ferramenta estará instalada e pronta para ser configurada em qualquer um dos seus projetos.
-
-######################## Como Usar #######################################
-
-Para cada repositório Git em que você desejar usar a automação, basta fazer uma configuração inicial de 10 segundos.
-
-#### **Passo 1: Navegue até o seu Repositório**
-
-```
 # Exemplo: configurando para o projeto C_lib
 cd /caminho/para/seu/C_lib
-```
 
-#### **Passo 2: Ative a Automação**
+**Instale a lib com o comando "pip install codewise" ou "py -m pip install codewise" (pode demorar um pouco aqui)**
 
-# Para ativar AMBAS as automações (Recomendado)
-codewise-init --all
-```
+após instalar a lib, você pode confirmar se está tudo certo com o comando codewise-help!
+
+depois disso basta apenas ativar os pré-hooks automatizados com o comando codewise-init --all e pronto
+
+**Passo 2: Ative a Automação**
+
+# Para ativar AMBAS as automações 
+**codewise-init --all**
+
 Você verá uma mensagem de sucesso confirmando que a automação está ativa.
-*(**Opcional:** use `--commit` para ativar apenas a análise rápida ou `--push` para ativar apenas a automação de PR).*
+*(**Opcional:** use o comando com `--commit` para ativar apenas a análise rápida ou `--push` para ativar apenas a automação de PR).*
 
-Antes de usar a ferramenta, você precisa configurar sua chave de API do Google Gemini. Este processo é feito localmente e de forma segura, sem expor sua chave no código.
+Após estes passos, a ferramenta estará instalada e pronta para ser configurada em qualquer um dos seus projetos 
+(idealmente sempre crie o ambiente virtual na pasta raiz toda vez que for criar um repositório novo para usar a ferramenta e evitar conflitos).
+=========================================================================================================================================================================================
+# CONFIG DO .ENV no repositório
 
- Crie o Arquivo de Ambiente (.env)
+ **Configuração obrigatória**
 
-A chave de API é lida de um arquivo chamado `.env` localizado na pasta principal da biblioteca. Primeiro, navegue até o diretório correto. A partir da raiz do projeto, o caminho é:
+Antes de usar o CodeWise, você precisa configurar sua chave da API do Google Gemini.
 
-"cd docs/code_wise/codewise/src/codewise" há um exemplo de .env em formato txt que você pode copiar o conteúdo dentro.
+1. No repositório que você está desenvolvendo, crie um arquivo chamado `.env`
+2. Copie e cole e de um CTRL+S para salvar:
 
-abra o terminal no local onde se encontra o crew.py, após ter copiado o conteúdo do exemplo use: "notepad .env"/"touch .env" (Linux) 
- aceite criar um novo arquivo e cole o conteúdo dentro, e adicione sua API key do gemini.
+GEMINI_API_KEY=sua-chave do gemini
+MODEL_NAME=gemini/gemini-2.0-flash
 
+Você pode criar esse arquivo com:
+
+- Windows:
+
+  notepad .env
+
+-Linux/macOS:
+
+touch .env && nano .env
+
+3. Após salvar, está tudo pronto. Considerando que seu novo repositório já está corretamente configurado com as branchs para PR sem conter apenas a default (main/master)
+=========================================================================================================================================================================================
+
+## DICAS : se quiser criar um novo repositório na máquina pelo prompt o gh ajuda com alguns comandos também :
+
+-mkdir MeuNovoProjeto 
+
+-cd MeuNovoProjeto
+
+-git init
+
+-gh repo create MeuNovoProjeto --public --source=. --remote=origin
+
+-(Crie seu primeiro arquivo, ex: README.md) echo > README.md
+
+-git add .
+
+-git commit -m "Primeiro commit"
+
+-git push --set-upstream origin main (ou master, dependendo do seu Git)
+
+-nova branch: git checkout -b nome-da-branch enviar para remoto: git push -u origin nome-da-branch
+
+=========================================================================================================================================================================================
 
 ## Fluxo de Trabalho do Dia a Dia
-Com a configuração concluída, seu fluxo de trabalho se torna mais inteligente:
 
 1.  Trabalhe normalmente em uma branch separada (ex: `minha-feature`).
 2.  Adicione suas alterações para o próximo commit:
@@ -125,7 +135,7 @@ Com a configuração concluída, seu fluxo de trabalho se torna mais inteligente
     git push
     ```
  se for a primeira vez use com --no-verify para não usar o programa ainda! (git push origin master --no-verify) (git push --set-upstream origin teste )
-    Agora, o **hook `pre-push` será ativado**. O `codewise-pr` irá criar ou atualizar seu Pull Request no GitHub com título, descrição e um comentário de análise técnica, tudo gerado por IA.
+    Agora, o **hook `pre-push` será ativado**. O `codewise-pr` irá criar ou atualizar seu Pull Request no GitHub com título, descrição e um comentário de análise técnica com sugestões e melhorias, tudo gerado por IA.
 
 ---
 *Este projeto foi desenvolvido como uma ferramenta para otimizar o processo de code review e documentação de software.*
