@@ -1,5 +1,3 @@
-# C:\Users\BPC\CodeWise\docs\code_wise\codewise\src\codewise\crew.py
-# (Seu código, que será mantido)
 import sys
 import os
 import re

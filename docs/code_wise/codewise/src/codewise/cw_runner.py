@@ -1,4 +1,4 @@
-# Arquivo: cw_runner.py (VERSÃO CORRIGIDA)
+# Arquivo: cw_runner.py (VERSÃO FINAL E COMPLETA)
 import os
 import sys
 from .crew import Codewise
@@ -35,7 +35,7 @@ class CodewiseRunner:
 
         if modo == 'titulo':
             agent = codewise_instance.summary_specialist()
-            task = Task(description=f"Crie um título de PR conciso no padrão Conventional Commits para as seguintes mudanças. A resposta deve ser APENAS o título **obrigatoriamente em Português do Brasil**, sem aspas, acentos graves ou qualquer outro texto:\n{contexto_para_ia}", expected_output="Um único título de PR.", agent=agent)
+            task = Task(description=f"Crie um título de PR conciso no padrão Conventional Commits para as seguintes mudanças. A resposta deve ser APENAS o título, **obrigatoriamente em Português do Brasil**, sem aspas, acentos graves ou qualquer outro texto:\n{contexto_para_ia}", expected_output="Um único título de PR.", agent=agent)
             resultado_final = Crew(agents=[agent], tasks=[task]).kickoff()
 
         elif modo == 'descricao':
@@ -46,13 +46,30 @@ class CodewiseRunner:
         elif modo == 'analise':
             analysis_crew = codewise_instance.crew()
             # O input para a análise profunda é passado aqui
-            contexto_analise = analysis_crew.kickoff(inputs={'input': contexto_para_ia})
+            analysis_crew.kickoff(inputs={'input': contexto_para_ia})
             
+            print("Salvando relatórios de análise individuais...", file=sys.stderr)
+            task_config = codewise_instance.tasks_config
+            task_map = {
+                task_config['analise_estrutura']['description']: "arquitetura_atual.md",
+                task_config['analise_heuristicas']['description']: "analise_heuristicas_integracoes.md",
+                task_config['analise_solid']['description']: "analise_solid.md",
+                task_config['padroes_projeto']['description']: "padroes_de_projeto.md"
+            }
+            
+            for task in analysis_crew.tasks:
+                if task.description in task_map:
+                    filename = task_map[task.description]
+                    file_path = os.path.join(caminho_repo, filename)
+                    # Usamos .raw_output para pegar apenas o texto gerado pelo agente daquela tarefa
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(task.output.raw_output)
+                    print(f"   - Arquivo '{filename}' salvo.", file=sys.stderr)
+
             resumo_agent = codewise_instance.summary_specialist()
-            
             resumo_task = Task(
-                description="Com base no contexto da análise completa fornecida, crie um 'Resumo Executivo do Pull Request' **obrigatoriamente em Português do Brasil** bem formatado em markdown, com 3-4 bullet points detalhados...",
-                expected_output="Um resumo executivo em markdown.", # <-- LINHA ADICIONADA
+                description="Com base no contexto da análise completa fornecida, crie um 'Resumo Executivo do Pull Request' **obrigatoriamente em Português do Brasil**, bem formatado em markdown, com 3-4 bullet points detalhados.",
+                expected_output="Um resumo executivo em markdown.",
                 agent=resumo_agent,
                 context=analysis_crew.tasks
             )
@@ -60,7 +77,7 @@ class CodewiseRunner:
 
         elif modo == 'lint':
             agent = codewise_instance.quality_consultant()
-            task = Task(description=f"Analise rapidamente as seguintes mudanças de código ('git diff') e aponte APENAS problemas óbvios ou code smells. Seja conciso. A resposta deve ser **em Português do Brasil** Se não houver problemas, retorne 'Nenhum problema aparente detectado.'.\n\nCódigo a ser analisado:\n{contexto_para_ia}", expected_output="Uma lista curta em bullet points com sugestões, ou uma mensagem de que está tudo ok.", agent=agent)
+            task = Task(description=f"Analise rapidamente as seguintes mudanças de código ('git diff') e aponte APENAS problemas óbvios ou code smells. A resposta deve ser **obrigatoriamente em Português do Brasil**. Seja conciso. Se não houver problemas, retorne 'Nenhum problema aparente detectado.'.\n\nCódigo a ser analisado:\n{contexto_para_ia}", expected_output="Uma lista curta em bullet points com sugestões, ou uma mensagem de que está tudo ok.", agent=agent)
             resultado_final = Crew(agents=[agent], tasks=[task]).kickoff()
         
         if os.path.exists(self.caminho_entrada):

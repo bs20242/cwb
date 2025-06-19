@@ -30,9 +30,12 @@ Execute este comando uma única vez. Ele cria uma pasta chamada .venv com uma in
 py -m venv .venv / python3 -m venv .venv (Linux)
 
 1.2. Para Ativar o Ambiente:
-Sempre que for trabalhar no projeto, você precisa ativar o ambiente.
+Sempre que for trabalhar no projeto, você precisa ativar o ambiente. Abra o powershell na pasta que instalou o .venv.
 
-.\.venv\Scripts\activate ou  source venv/bin/activate
+Pode ser que haja erro de execução com o próximo comando devido a a falta permissões: 
+*execute antes: "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser"*
+
+.\.venv\Scripts\activate ou  source venv/bin/activate (Linux)
 
 Você saberá que funcionou porque o início da linha do seu terminal mudará, mostrando (.venv) antes do caminho ou o nome que foi escolhido.
 

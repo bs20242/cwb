@@ -22,7 +22,9 @@ def run_codewise_mode(mode, repo_path, branch_name):
     ]
     try:
         env = os.environ.copy()
-        env['PYTHONPATH'] = f"{os.path.dirname(os.path.dirname(__file__))}{os.pathsep}{env.get('PYTHONPATH', '')}"
+        # Adiciona a raiz do projeto ao PYTHONPATH para garantir que os módulos sejam encontrados
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        env['PYTHONPATH'] = f"{project_root}{os.pathsep}{env.get('PYTHONPATH', '')}"
         
         result = subprocess.run(
             command, 
@@ -36,7 +38,13 @@ def run_codewise_mode(mode, repo_path, branch_name):
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"❌ FALHA no modo '{mode}':\n--- Erro do Subprocesso ---\n{e.stderr}\n--------------------------", file=sys.stderr)
+        # LÓGICA DE DEBUG MELHORADA PARA CAPTURAR TODOS OS ERROS
+        print(f"❌ FALHA no modo '{mode}': O subprocesso falhou com o código de saída {e.returncode}", file=sys.stderr)
+        print("\n--- Saída de Erro (stderr) do Subprocesso ---", file=sys.stderr)
+        print(e.stderr if e.stderr else "Nenhuma saída de erro foi capturada.")
+        print("\n--- Saída Padrão (stdout) do Subprocesso ---", file=sys.stderr)
+        print(e.stdout if e.stdout else "Nenhuma saída padrão foi capturada.")
+        print("---------------------------------------------", file=sys.stderr)
         return None
 
 def obter_branch_padrao_remota(repo_path):
@@ -141,7 +149,6 @@ def main_pr():
     if pr_numero:
         print(f"⚠️ PR #{pr_numero} já existente. Acrescentando nova análise...", file=sys.stderr)
         try:
-            print("   - Buscando descrição existente...", file=sys.stderr)
             descricao_antiga_raw = subprocess.check_output(
                 ["gh", "pr", "view", str(pr_numero), "--json", "body"],
                 cwd=repo_path, text=True, encoding='utf-8'
@@ -154,14 +161,13 @@ def main_pr():
                 f"**🔄 Atualização em {timestamp}**\n\n"
                 f"{descricao}"
             )
-
             body_final = descricao_antiga + nova_entrada_descricao
 
-            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", body_final], check=False, text=True, capture_output=True, encoding='utf-8', cwd=repo_path)
+            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", body_final], check=False, cwd=repo_path)
             print(f"✅ Descrição do PR #{pr_numero} atualizada com novas informações.")
         except Exception as e:
             print(f"⚠️ Não foi possível buscar a descrição antiga. Substituindo pela nova. Erro: {e}", file=sys.stderr)
-            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", descricao], check=False, text=True, capture_output=True, encoding='utf-8', cwd=repo_path)
+            subprocess.run(["gh", "pr", "edit", str(pr_numero), "--title", titulo_final, "--body", descricao], check=False, cwd=repo_path)
     else:
         print("🆕 Nenhum PR aberto. Criando Pull Request...", file=sys.stderr)
         try:
