@@ -113,7 +113,7 @@ def main_lint():
 # ===================================================================
 def main_pr():
     if not shutil.which("gh"):
-        print("❌ Erro: A GitHub CLI ('gh') não foi encontrada no seu sistema.", file=sys.stderr)
+        print("❌ Erro: GitHub CLI ('gh') não foi encontrado no seu sistema.", file=sys.stderr)
         print("   Por favor, instale-a a partir de: https://cli.github.com/", file=sys.stderr)
         sys.exit(1)
 
@@ -124,7 +124,7 @@ def main_pr():
     try:
         current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], encoding='utf-8', cwd=repo_path).strip()
     except Exception as e:
-        sys.exit(f"❌ Erro ao detectar branch Git: {e}")
+        sys.exit(f"❌ Erro ao detectar a branch Git: {e}")
 
     base_branch_target = obter_branch_padrao_remota(repo_path)
     if current_branch == base_branch_target:

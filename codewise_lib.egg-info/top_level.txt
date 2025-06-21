@@ -1,2 +1,0 @@
-codewise_lib
-scripts
