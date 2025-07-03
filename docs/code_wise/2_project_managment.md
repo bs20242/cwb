@@ -1,89 +1,89 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 title: Project Management
-description: Presents the project`s developing planning.
+description: Presents the project's developing planning.
 ---
 
 ## Project Model Canvas (PMC)
 
-### Justification  
+### Justification
 Software developers face slow manual feedback cycles, difficulty identifying performance issues, accumulated technical debt, and a lack of reliable indicators to support code quality improvements.
 
-### SMART Objective  
+### SMART Objective
 Develop and launch the CodeWise API within 3 months, with an 8-person team, to increase productivity and delivery quality by providing automated feedback and statistical insights.
 
-### Final Product  
+### Final Product
 An API developed using FastAPI, integrated with OpenAI GPT-3 to analyze code in Python, C#, and Java. The API provides documented endpoints (Swagger/OpenAPI), real-time consultations, and performance and quality reports.
 
-### Benefits  
-- Automated code review generation  
-- Reliable statistics on technical debt  
-- Proven quality improvement in deliveries, supported by literature and team data  
+### Benefits
+- Automated code review generation
+- Reliable statistics on technical debt
+- Proven quality improvement in deliveries, supported by literature and team data
 - Direct impact on developer productivity
 
-### Requirements  
-- FastAPI and Python 3.x  
-- Integration with the OpenAI GPT-3 API  
-- Support for analyzing code in Python, C#, and Java  
-- Docker containerization  
+### Requirements
+- FastAPI and Python 3.x
+- Integration with the OpenAI GPT-3 API
+- Support for analyzing code in Python, C#, and Java
+- Docker containerization
 - Secure management of access keys and data
 
-### External Stakeholders and Influencing Factors  
-- Developers at LEDS  
-- Developers and companies seeking to improve code quality  
+### External Stakeholders and Influencing Factors
+- Developers at LEDS
+- Developers and companies seeking to improve code quality
 - Open source communities and tech forums
 
-### Premises  
-- The development team has knowledge of Python and FastAPI  
+### Premises
+- The development team has knowledge of Python and FastAPI
 - The project management team is familiar with delivery monitoring tools
 
-### Constraints  
-- OpenAI API limitations (rate limits and code size)  
-- Strict security requirements for API keys and access credentials  
+### Constraints
+- OpenAI API limitations (rate limits and code size)
+- Strict security requirements for API keys and access credentials
 - Budget and delivery deadline limited to 3 months
 
-### Risks  
-- **External Dependency**: Reliance on the OpenAI API (risk of rate limits or downtime)  
-- **Feedback Accuracy**: Possibility of imprecise suggestions from GPT-3  
-- **Probability**: Moderate, due to integration complexity and request volume  
+### Risks
+- **External Dependency**: Reliance on the OpenAI API (risk of rate limits or downtime)
+- **Feedback Accuracy**: Possibility of imprecise suggestions from GPT-3
+- **Probability**: Moderate, due to integration complexity and request volume
 - **Mitigation Actions**: Continuous monitoring, robust testing, fallback plans; acceptance of potential limitations
 
-### Team  
-- **Project Management (GPS students)**: Planning, monitoring, coordination, and communication  
+### Team
+- **Project Management (GPS students)**: Planning, monitoring, coordination, and communication
 - **Development (Systems Project students)**: Coding, testing, deployment, and documentation
 
-### Cost Estimate  
-- **Team Load**: 8 people × 8 hours/week = 64 hours/week  
-- **Rate per Hour** (Pleno Developer avg.): R$ 80/hour  
-- **Estimated Weekly Cost**: 64 × R$ 80 = R$ 5,120  
+### Cost Estimate
+- **Team Load**: 8 people × 8 hours/week = 64 hours/week
+- **Rate per Hour** (Pleno Developer avg.): R$ 80/hour
+- **Estimated Weekly Cost**: 64 × R$ 80 = R$ 5,120
 - **Estimated Total over 12 Weeks**: R$ 61,440
 
-### Team Topology  
-- This project follows a **Platform Team** model.  
-  The CodeWise team provides internal services and tools to **Stream-Aligned Teams** (e.g., the IT development teams), who deliver value directly to end users.  
+### Team Topology
+- This project follows a **Platform Team** model.
+  The CodeWise team provides internal services and tools to **Stream-Aligned Teams** (e.g., the IT development teams), who deliver value directly to end users.
   CodeWise supports them by enhancing the quality and efficiency of their code through automated analysis.
 
-### Deliverables 
-<!--*(To be completed)*  
+### Deliverables
+{/*(To be completed)
  Define the major deliverables of the CodeWise project, e.g.:
 - Code Analysis Module
 - Discord Notification Integration
 - Web-based Documentation Portal
--->
-- **Code Analysis Module** – Rule-based code validation with Gemini API.  
-- **Platform Integration** – GitHub Webhooks, Discord alerts via n8n.  
-- **Feedback Engine** – Smart improvement suggestions with clean formatting.  
+*/}
+- **Code Analysis Module** – Rule-based code validation with Gemini API.
+- **Platform Integration** – GitHub Webhooks, Discord alerts via n8n.
+- **Feedback Engine** – Smart improvement suggestions with clean formatting.
 - **Metrics Dashboard** – PR scores, activity history, developer stats.
 
-### Timeline   
-<!--*(To be completed)*
+### Timeline
+{/*(To be completed)
 Example structure:
 - Month 1: Requirement gathering, design, prototyping
 - Month 2: Module development, GPT-3 integration, early testing
 - Month 3: Final testing, documentation, beta release
--->
-- **Month 1**: Planning, prototyping, Gemini integration  
-- **Month 2**: Core development, GitHub/Discord integration, testing  
+*/}
+- **Month 1**: Planning, prototyping, Gemini integration
+- **Month 2**: Core development, GitHub/Discord integration, testing
 - **Month 3**: Dashboard, final testing, documentation, beta release
 
 ## Team Topology
@@ -101,7 +101,7 @@ The CodeWise project is being developed by a platform team composed of the follo
 - **Wal Candeia**
 
 #### Systems and Development
-- **Arthur Miguel**
+
 - **Michele Altavilla**
 - **Bernardo Rosa**
 - **Gabriel Brito**
@@ -117,32 +117,29 @@ This separation allows the Platform Team (CodeWise team) to focus on building an
 
 ### Project Management Team
 
-- **Perceu Oliveira** – *Dominance*  
+- **Perceu Oliveira** – *Dominance*
   Emphasis on achieving results, competitiveness, and confidence. Enjoys challenges and immediate outcomes.
 
-- **Miguel Malini** – *Steadiness*  
+- **Miguel Malini** – *Steadiness*
   Emphasis on cooperation, sincerity, loyalty, and being a team player. Tends to be supportive and prefers to stay in the background.
 
-- **João Ferrareis** – *Conscientiousness*  
+- **João Ferrareis** – *Conscientiousness*
   Focus on quality, precision, organization, and competence. Cooperative, sincere, loyal, cautious, and attentive to details.
 
-- **Wal Candeia** – *Inactive*  
+- **Wal Candeia** – *Inactive*
   Currently not participating in the project due to a health issue.
 
 ---
 
 ### Systems and Development Team
 
-- **Arthur Miguel** – *Steadiness*  
-  Emphasis on cooperation, sincerity, loyalty, and being a team player. Tends to be supportive and prefers to stay in the background.
-
-- **Michele Altavilla** – *Influence*  
+- **Michele Altavilla** – *Influence*
   Emphasis on influencing and connecting with others. Enjoys teamwork, sharing, and motivating others.
 
-- **Bernardo Rosa** – *Steadiness*  
+- **Bernardo Rosa** – *Steadiness*
   Emphasis on cooperation, sincerity, loyalty, and being a team player. Tends to be supportive and prefers to stay in the background.
 
-- **Gabriel Brito** – *Dominance*  
+- **Gabriel Brito** – *Dominance*
   Emphasis on achieving results, competitiveness, and confidence. Enjoys challenges and immediate outcomes.
 
 ## Communication Plan
@@ -155,10 +152,10 @@ The team has chosen **Telegram** as the primary communication platform. While Di
 
 Two distinct Telegram groups have been created:
 
-1. **Management Group**  
+1. **Management Group**
    A private group that includes only the four members of the **Project Management Team**. This space is used for internal coordination, defining responsibilities, sharing feedback, and planning deliveries. It is not divided into topics.
 
-2. **General Project Group**  
+2. **General Project Group**
    This group includes all eight members from both the **Management** and **Project & Systems** teams. Inside this group, Telegram's **topic/thread feature** is used to organize communication into specific areas:
 
    - **General Discussion**: For daily conversation, updates, clarifying doubts, and discussing ideas between all members.
@@ -185,13 +182,13 @@ The team meets weekly with all project members every **Monday afternoon** (or **
 - Planning upcoming tasks and priorities
 
 ## Backlog
-<!--
+{/*
 | ID | Feature | Description | Importance |Proposal|
 | -- | ------- | ----------- |----------- |--------|
 | 1  | Send Feedback about a code to developer| Implements a code review automaticaly seen Performance and Code Smell | 100 |Improve software developmen quality in 10% |
 | 2  | Create Improvement/Refactor test on management program| When a improment is detected a Improvement/Refactor Task is created on management software (e.g., Jira) | 90 |Improve software developmen quality and management in 15% |
 | 3  | Send informartion about quality of code to a database to improve the developer| Send information about code smell and performance of code to a database to identify means to improve the developer that creates the code | 95 |Improve software developmen quality and management in 20% |
--->
+*/}
 
 | ID | Feature | Description | Importance | Proposal |
 |----|---------|-------------|------------|----------|
@@ -212,8 +209,8 @@ The team meets weekly with all project members every **Monday afternoon** (or **
 * Release 2.0 (Undefined): Code Analysis & Platform Integration
 * Release 3.0 (Undefined): Feedback System & Visualization
 * Release 4.0 (Undefined): Performance & Quality Enhancements
-<!--* Release 2.0 (Undefined): Create Improvement/Refactor test on management program
-* Release 3.0 (Undefined): Send informartion about quality of code to a database to improve the developerr-->
+{/* Release 2.0 (Undefined): Create Improvement/Refactor test on management program */}
+{/* Release 3.0 (Undefined): Send informartion about quality of code to a database to improve the developerr */}
 
 ## Release 1.0 - 01/11/2024
 
@@ -227,8 +224,8 @@ The team meets weekly with all project members every **Monday afternoon** (or **
       * Spend much time to analysis many code, using GPT4
     * **Oportunity**
       * Develop our IA to improve time and no spend money with GPT4
-  
-  * **Deadline I**  01/10/2023: Send Feedback about a code to developer.      
+
+  * **Deadline I** 01/10/2023: Send Feedback about a code to developer.
 
 ```mermaid
 %%{
@@ -239,14 +236,9 @@ The team meets weekly with all project members every **Monday afternoon** (or **
   }
 }%%
 timeline
-   
+
     Send Feedback about a code to developer  <br> 01/10/2024    : Define prompt to GPT
                                                                 : Send information to discord channel
                                                                 : Send information to Pull Request`s comment
                                                                 : Validate with a developer
                                                                 : Teaching a developers
-
-
-
-```
-
